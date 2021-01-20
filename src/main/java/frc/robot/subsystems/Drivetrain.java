@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.geometry.Pose2d;
 import edu.wpi.first.wpilibj.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.kinematics.DifferentialDriveKinematics;
@@ -26,6 +27,7 @@ import edu.wpi.first.wpilibj.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpiutil.math.numbers.N2;
+import frc.robot.Constants.DriveConstants;
 
 public class Drivetrain extends SubsystemBase {
 
@@ -47,9 +49,22 @@ public class Drivetrain extends SubsystemBase {
        new SpeedControllerGroup(m_leftLeader, m_leftFollower);
    private final SpeedControllerGroup m_rightGroup =
        new SpeedControllerGroup(m_rightLeader, m_rightFollower);
+
+   // The robot's drive
+   private final DifferentialDrive m_drive = new DifferentialDrive(m_leftGroup, m_rightGroup);
  
-   private final Encoder m_leftEncoder = new Encoder(0, 1);
-   private final Encoder m_rightEncoder = new Encoder(2, 3);
+   //private final Encoder m_leftEncoder = new Encoder(0, 1);
+   //private final Encoder m_rightEncoder = new Encoder(2, 3);
+
+   private final Encoder m_leftEncoder =
+      new Encoder(DriveConstants.kLeftEncoderPorts[0], DriveConstants.kLeftEncoderPorts[1],
+                  DriveConstants.kLeftEncoderReversed);
+
+   // The right-side drive encoder
+   private final Encoder m_rightEncoder =
+      new Encoder(DriveConstants.kRightEncoderPorts[0], DriveConstants.kRightEncoderPorts[1],
+                  DriveConstants.kRightEncoderReversed);
+                  
  
    private final PIDController m_leftPIDController = new PIDController(8.5, 0, 0);
    private final PIDController m_rightPIDController = new PIDController(8.5, 0, 0);
@@ -82,8 +97,11 @@ public class Drivetrain extends SubsystemBase {
     // Set the distance per pulse for the drive encoders. We can simply use the
     // distance traveled for one rotation of the wheel divided by the encoder
     // resolution.
-    m_leftEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
-    m_rightEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
+    //m_leftEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
+    //m_rightEncoder.setDistancePerPulse(2 * Math.PI * kWheelRadius / kEncoderResolution);
+    
+    m_leftEncoder.setDistancePerPulse(DriveConstants.kEncoderDistancePerPulse);
+    m_rightEncoder.setDistancePerPulse(DriveConstants.kEncoderDistancePerPulse);
 
     m_leftEncoder.reset();
     m_rightEncoder.reset();
@@ -96,6 +114,8 @@ public class Drivetrain extends SubsystemBase {
   public void periodic() {
     updateOdometry();
     m_fieldSim.setRobotPose(m_odometry.getPoseMeters());
+    SmartDashboard.putNumber("Encoder left Rate", m_leftEncoder.getRate());
+    SmartDashboard.putNumber("Encoder right Rate", m_rightEncoder.getRate());
   }
 
   @Override
@@ -147,4 +167,48 @@ public class Drivetrain extends SubsystemBase {
     public Pose2d getPose() {
       return m_odometry.getPoseMeters();
     }
+
+    public double getVelocity(){
+      return m_leftEncoder.getRate();
+    }
+
+
+    /**
+     * Added from the Trajectory walk Through
+     */
+
+     /**
+   * Returns the current wheel speeds of the robot.
+   *
+   * @return The current wheel speeds.
+   */
+  public DifferentialDriveWheelSpeeds getWheelSpeeds() {
+    return new DifferentialDriveWheelSpeeds(m_leftEncoder.getRate(), m_rightEncoder.getRate());
+  }
+
+  /**
+   * Drives the robot using arcade controls.
+   *
+   * @param fwd the commanded forward movement
+   * @param rot the commanded rotation
+   */
+  public void arcadeDrive(double fwd, double rot) {
+    //m_drive.arcadeDrive(fwd, rot);
+  }
+
+  /**
+   * Controls the left and right sides of the drive directly with voltages.
+   *
+   * @param leftVolts  the commanded left output
+   * @param rightVolts the commanded right output
+   */
+  public void tankDriveVolts(double leftVolts, double rightVolts) {
+    SmartDashboard.putNumber("leftVolts", leftVolts);
+    SmartDashboard.putNumber("rightVolts", rightVolts);
+    m_leftGroup.setVoltage(leftVolts);
+    m_rightGroup.setVoltage(rightVolts);
+    m_drive.feed();
+  }
+
+
 }
