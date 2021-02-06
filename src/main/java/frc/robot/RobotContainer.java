@@ -25,7 +25,6 @@ import edu.wpi.first.wpilibj.trajectory.TrajectoryUtil;
 import edu.wpi.first.wpilibj.trajectory.constraint.DifferentialDriveVoltageConstraint;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.commands.DriveTrajectory;
 import frc.robot.commands.DriveWithJoysticks;
 import frc.robot.subsystems.Drivetrain;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -87,7 +86,7 @@ public class RobotContainer {
             // Apply the voltage constraint
             .addConstraint(autoVoltageConstraint);
 
-    String trajectoryJSON = "paths/Unnamed.wpilib.json";
+    String trajectoryJSON = "paths/output/Slalom.wpilib.json";
     Trajectory trajectory = new Trajectory();
        try {
           Path trajectoryPath = Filesystem.getDeployDirectory().toPath().resolve(trajectoryJSON);
