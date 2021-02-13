@@ -41,6 +41,7 @@ public class Drivetrain extends SubsystemBase {
    private static final double kWheelRadius = 0.0508;
    private static final int kEncoderResolution = -4096;
  
+   //Convert these to Falcons
    private final PWMVictorSPX m_leftLeader = new PWMVictorSPX(1);
    private final PWMVictorSPX m_leftFollower = new PWMVictorSPX(2);
    private final PWMVictorSPX m_rightLeader = new PWMVictorSPX(3);
